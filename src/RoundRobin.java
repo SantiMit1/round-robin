@@ -8,6 +8,7 @@ public class RoundRobin {
     private int quantumCounter = 0;
     private final float tiempoDeIntercambio;
     private Proceso procesoAnterior;
+    private LinkedList<Resultados> listaR;
 
     public RoundRobin(int quantum) {
         this.colaProcesos = new LinkedList<>();
@@ -15,6 +16,7 @@ public class RoundRobin {
         this.quantum = quantum;
         this.tiempoDeIntercambio = quantum / 4.0f;
         this.procesoAnterior = null;
+        listaR=new LinkedList<>();
     }
 
     public void agregarProceso(float tiempoDeServicio) {
@@ -32,30 +34,57 @@ public class RoundRobin {
 
             if (proceso.getTiempoDeServicio() > 0) {
                 if (!proceso.equals(procesoAnterior) && procesoAnterior != null) {
-                    System.out.println("Scheduler quita el proceso " + procesoAnterior.getPid() + " y lo pone en espera. (" + tiempoDeIntercambio / 2 + " unidades de tiempo)");
+                    System.out.println("Scheduler quita el proceso anterior " + procesoAnterior.getPid() + " y lo pone en cola de espera. (" + tiempoDeIntercambio / 2 + " unidades de tiempo)");
                     reloj.avanzar(tiempoDeIntercambio / 2);
                     colaProcesos.add(procesoAnterior);
                 }
 
-                if (!proceso.equals(procesoAnterior)) {
-                    System.out.println("Scheduler pone en ejecucion el proceso " + proceso.getPid() + " (" + tiempoDeIntercambio / 2 + " unidades de tiempo)");
-                }
+                if (proceso.getTiempoDeServicio()>quantum)
+                {
+                    if (!proceso.equals(procesoAnterior))
+                    {//si no es el mismo tiene que ponerlo
+                        System.out.println("el scheduler inserta el proceso: "+ proceso.getPid());
+                        reloj.avanzar(tiempoDeIntercambio/2);
+                        System.out.println("el reloj avanza a: "+ reloj.getTiempo());
+                    }
+                    //se ejecuta el proceso
+                    System.out.println("proceso" + proceso.getPid() + " en ejecucion.....");
 
-                if (proceso.getTiempoDeServicio() > quantum) {
-                    System.out.println("Scheduler ejecuta el proceso " + proceso.getPid() + " durante " + quantum + " unidades de tiempo.");
-                    reloj.avanzar(quantum);
-                    proceso.setTiempoDeServicio(proceso.getTiempoDeServicio() - quantum);
-                    colaProcesos.add(proceso);
+                    //-------------------------------------------------------------
+                    try {//espera antes de continuar,mejora legibilidad,solo semantico.
+                        Thread.sleep(2000); // Espera 2000 milisegundos = 2 segundos
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    //------------------------------------------------------------
+
+                    proceso.setTiempoDeServicio(proceso.getTiempoDeServicio()-quantum);//resto el ts
+                    reloj.avanzar(quantum);// actualizo reloj
+
+                    System.out.println(" el tiempo del reloj es de: "+ reloj.getTiempo());
+
+
                 } else {
-                    System.out.println("Scheduler ejecuta el proceso " + proceso.getPid() + " durante " + proceso.getTiempoDeServicio() + " unidades de tiempo.");
-                    reloj.avanzar(proceso.getTiempoDeServicio());
-                    proceso.setTiempoDeServicio(0);
+
+                    if (!proceso.equals(procesoAnterior))
+                    {//si no es el mismo tiene que ponerlo
+                        System.out.println("el scheduler inserta el proceso: "+ proceso.getPid());
+                        reloj.avanzar(tiempoDeIntercambio/2);
+                        System.out.println("el reloj avanza a: "+ reloj.getTiempo());
+                    }
+                    // ejecuta el proceso por el tiempo restante
+                    reloj.avanzar(proceso.getTiempoDeServicio());//avanzo tiempo restante en el reloj
+                    proceso.setTiempoDeServicio(0);//seteo a 0 el tiempo de servicio requerido
+
+                    System.out.println("proceso terminado, pid: "+proceso.getPid()+ " ,tiempo de retorno: "+ reloj.getTiempo());
+
                 }
 
-                quantumCounter++;
-                procesoAnterior = proceso;
-            }
 
+                procesoAnterior = proceso;
+                quantumCounter++;
+            }
+            //aca es cuando el ts es 0, no usar dado que termino el proceso
         }
 
         System.out.println("Terminada la ejecucion de todos los procesos en " + reloj.getTiempo() + " unidades de tiempo (" + quantumCounter + " quantums).");
