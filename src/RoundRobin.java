@@ -2,7 +2,7 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 public class RoundRobin {
-    private final Queue<Proceso> procesos;
+    private final Queue<Proceso> colaProcesos;
     private final Reloj reloj;
     private final int quantum;
     private int quantumCounter = 0;
@@ -10,7 +10,7 @@ public class RoundRobin {
     private Proceso procesoAnterior;
 
     public RoundRobin(int quantum) {
-        this.procesos = new LinkedList<>();
+        this.colaProcesos = new LinkedList<>();
         this.reloj = new Reloj();
         this.quantum = quantum;
         this.tiempoDeIntercambio = quantum / 4.0f;
@@ -22,19 +22,19 @@ public class RoundRobin {
             throw new IllegalArgumentException("El tiempo de servicio debe ser mayor que cero.");
         }
 
-        Proceso nuevoProceso = new Proceso(procesos.size() + 1, tiempoDeServicio);
-        procesos.add(nuevoProceso);
+        Proceso nuevoProceso = new Proceso(colaProcesos.size() + 1, tiempoDeServicio);
+        colaProcesos.add(nuevoProceso);
     }
 
     public void ejecutar() {
-        while (!procesos.isEmpty()) {
-            Proceso proceso = procesos.poll();
+        while (!colaProcesos.isEmpty()) {
+            Proceso proceso = colaProcesos.poll();
 
             if (proceso.getTiempoDeServicio() > 0) {
                 if (!proceso.equals(procesoAnterior) && procesoAnterior != null) {
                     System.out.println("Scheduler quita el proceso " + procesoAnterior.getPid() + " y lo pone en espera. (" + tiempoDeIntercambio / 2 + " unidades de tiempo)");
                     reloj.avanzar(tiempoDeIntercambio / 2);
-                    procesos.add(procesoAnterior);
+                    colaProcesos.add(procesoAnterior);
                 }
 
                 if (!proceso.equals(procesoAnterior)) {
@@ -45,7 +45,7 @@ public class RoundRobin {
                     System.out.println("Scheduler ejecuta el proceso " + proceso.getPid() + " durante " + quantum + " unidades de tiempo.");
                     reloj.avanzar(quantum);
                     proceso.setTiempoDeServicio(proceso.getTiempoDeServicio() - quantum);
-                    procesos.add(proceso);
+                    colaProcesos.add(proceso);
                 } else {
                     System.out.println("Scheduler ejecuta el proceso " + proceso.getPid() + " durante " + proceso.getTiempoDeServicio() + " unidades de tiempo.");
                     reloj.avanzar(proceso.getTiempoDeServicio());
