@@ -2,7 +2,7 @@ public class Resultados {
     private final float tiempoServicio;
     private float rFinal;
 
-    public Resultados(float tiempoServicio, int pid) {
+    public Resultados(float tiempoServicio) {
         this.tiempoServicio = tiempoServicio;
     }
 

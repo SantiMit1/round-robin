@@ -7,7 +7,7 @@ public class Proceso {
     public Proceso(int pid, float tiempoDeServicio) {
         this.pid = pid;
         this.tiempoDeServicio = tiempoDeServicio;
-        this.registroAsociado = new Resultados(this.tiempoDeServicio, this.pid);
+        this.registroAsociado = new Resultados(this.tiempoDeServicio);
     }
 
     public void cargarTiempoFinal(float tiempo) {
